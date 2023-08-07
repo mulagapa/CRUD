@@ -1,0 +1,16 @@
+{
+    "Tables": [
+        {
+            "Table1": {
+                "Name": "INTEGER",
+                "Address": "TEXT"
+            }
+        },
+        {
+            "Table2": {
+                "CompanyName": "Text",
+                "CompanyAddress": "TEXT"
+            }
+        }
+    ]
+}
