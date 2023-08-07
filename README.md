@@ -24,7 +24,7 @@ API Endpoints:
 
 The application exposes the following API endpoints:
 
-POST /:collection: Create a new entry in the specified collection. The request body should contain the data for the new entry. If any of the columns are not present it will add the columns in the database. It will check if the collections exists or not in the database.
+POST /:collection: Create a new entry in the specified collection. The request body should contain the data for the new entry. If any of the columns are not present it will add the columns in the database. It will check if the collections exists or not in the database. If the collection doesn't exist it will create a collection and add the columns. The response of the api is the id value
 
 GET /:collection/:id: Retrieve a specific entry from the specified collection by its ID.
 
