@@ -47,8 +47,6 @@ Future Features:
 
 One thing i would add would be a GET :/collections end point so that the user can get all the rows in the collection.
 
-The id value is used for accessing all the rows.
-
 A cache layer so that if the application does get deployed retrieving values from a cache layer will have less cost when compared to retrieving values from database.
 
 The application currently uses a local SQLite instance for simplicity, but in production environments, you should configure it to use a more suitable SQL database.
