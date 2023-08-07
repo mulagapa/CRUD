@@ -55,10 +55,11 @@ export const createTable = (
     });
   });
 };
+const delay = async (ms : number) => new Promise(res => setTimeout(res, ms));
 
 export const addValuesTable = async (
   tableName: string,
-  tableValues: Object,
+  tableValues: Object
 ): Promise<number> => {
   return new Promise(async (resolve, reject) => {
     if (await checkIfTableExists(tableName)) {
@@ -71,67 +72,15 @@ export const addValuesTable = async (
       if (addingColumns.length > 0) {
         await alterTables(tableName, addingColumns);
       }
-      tableColumnNames = await getColumnNames(tableName);
-      await setTimeout(() => {},5000)
-      const updateValues = Object.entries(tableValues).map(([key, value]) => [
-        key,
-        value,
-      ]);
-      const columns = updateValues.map(([key]) => key).join(", ");
-      const placeholders = updateValues.map(() => "?").join(", ");
-      const values = updateValues.map(([, value]) => value);
-      data = await createConnection();
-      const insertQuery = `
-      INSERT INTO ${tableName} (${columns})
-      VALUES (${placeholders})
-    `;
-      try {
-        await data.run(insertQuery, [...values], async function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            const insertedId = this.lastID; 
-            await data.close();
-            console.log("Inserted successfully with ID:", insertedId);
-            resolve(insertedId);
-          }
-        });
-      }
-      catch(err){
-        console.log(err)
-      }
-    }
-    else{
-      await setTimeout(() => {},5000)
-      await createTable(tableName,tableValues);
-      await setTimeout(() => {},5000)
-      const updateValues = Object.entries(tableValues).map(([key, value]) => [
-        key,
-        value,
-      ]);
-      const columns = updateValues.map(([key]) => key).join(", ");
-      const placeholders = updateValues.map(() => "?").join(", ");
-      const values = updateValues.map(([, value]) => value);
-      data = await createConnection();
-      const insertQuery = `
-      INSERT INTO ${tableName} (${columns})
-      VALUES (${placeholders})
-    `;
-    try {
-      await data.run(insertQuery, [...values], async function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          const insertedId = this.lastID; 
-          await data.close();
-          console.log("Inserted successfully with ID:", insertedId);
-          resolve(insertedId);
-        }
-      });
-    }
-    catch(err){
-      console.log(err)
-    }
+      await delay(1000)
+      console.log("After Time out")
+      let id = await InsertingIntoTable(tableName,tableValues)
+      resolve(id)
+    } else {
+      await createTable(tableName, tableValues);
+      await delay(1000)
+      let id = await InsertingIntoTable(tableName,tableValues)
+      resolve(id)
     }
   });
 };
@@ -147,7 +96,9 @@ export const alterTables = async (
           console.error("Error opening database:", err.message);
         } else {
           const addColumnsQuery = `ALTER TABLE ${tableName} ADD COLUMN ${value} TEXT`;
+          console.log(addColumnsQuery)
           try {
+            await setTimeout(() => {}, 5000);
             await db.exec(addColumnsQuery, function (err) {
               if (err) {
                 reject(err);
@@ -156,8 +107,8 @@ export const alterTables = async (
           } catch (err) {
             console.log("Error Altering the table");
           }
-          await db.close();
         }
+        await db.close();
       });
     });
     resolve(true);
@@ -207,7 +158,7 @@ export const addValueToTable = (
       await alterTables(tableName, addingColumns);
     }
     tableColumnNames = await getColumnNames(tableName);
-    await setTimeout(() => {},5000)
+    await setTimeout(() => {}, 5000);
     const columns = updateValues.map(([key]) => key).join(", ");
     const placeholders = updateValues.map(() => "?").join(", ");
     const values = updateValues.map(([, value]) => value);
@@ -231,7 +182,7 @@ export const addValueToTable = (
         db.close();
         resolve();
       } else {
-        await setTimeout(() => {},5000)
+        await setTimeout(() => {}, 5000);
         const db = await createConnection();
         const insertQuery = `
       INSERT INTO ${tableName} (${columns}, id)
@@ -277,5 +228,39 @@ export const deleteTableValue = (
       reject();
     }
     db.close();
+  });
+};
+
+export const InsertingIntoTable = async (
+  tableName: string,
+  tableValues: Object
+): Promise<number> => {
+  return new Promise(async (resolve, reject) => {
+    const updateValues = Object.entries(tableValues).map(([key, value]) => [
+      key,
+      value,
+    ]);
+    const columns = updateValues.map(([key]) => key).join(", ");
+    const placeholders = updateValues.map(() => "?").join(", ");
+    const values = updateValues.map(([, value]) => value);
+    let data = await createConnection();
+    const insertQuery = `
+      INSERT INTO ${tableName} (${columns})
+      VALUES (${placeholders})
+    `;
+    try {
+      await data.run(insertQuery, [...values], async function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          const insertedId = this.lastID;
+          await data.close();
+          console.log("Inserted successfully with ID:", insertedId);
+          resolve(insertedId);
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
   });
 };
